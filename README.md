@@ -5,6 +5,7 @@
 [![tests](https://github.com/MR73BIIO/voro-qgis-teryt-qa/actions/workflows/tests.yml/badge.svg)](https://github.com/MR73BIIO/voro-qgis-teryt-qa/actions/workflows/tests.yml)
 ![QGIS](https://img.shields.io/badge/QGIS-3.40%20%7C%203.44%20%7C%204.2-589632)
 ![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue)
+[![DOI](https://zenodo.org/badge/1429926843.svg)](https://doi.org/10.5281/zenodo.23578393)
 
 **QGIS plugin that checks Polish municipality boundaries (PRG) against the official TERC register, and shows every problem on the map.**
 
@@ -77,7 +78,7 @@ The state border (C7, planned), counties and voivodeships themselves, and whethe
 
 ## License
 
-GPL-2.0-or-later. Citation data: [`CITATION.cff`](CITATION.cff). Changes: [`CHANGELOG.md`](CHANGELOG.md).
+GPL-2.0-or-later. DOI (all versions): [10.5281/zenodo.23578393](https://doi.org/10.5281/zenodo.23578393), version 0.1.0: [10.5281/zenodo.23578394](https://doi.org/10.5281/zenodo.23578394). Citation data: [`CITATION.cff`](CITATION.cff). Changes: [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 

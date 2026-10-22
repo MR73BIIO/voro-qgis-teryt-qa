@@ -5,6 +5,7 @@
 [![tests](https://github.com/MR73BIIO/voro-qgis-teryt-qa/actions/workflows/tests.yml/badge.svg)](https://github.com/MR73BIIO/voro-qgis-teryt-qa/actions/workflows/tests.yml)
 ![QGIS](https://img.shields.io/badge/QGIS-3.40%20%7C%203.44%20%7C%204.2-589632)
 ![Licencja](https://img.shields.io/badge/licencja-GPL--2.0%20lub%20nowsza-blue)
+[![DOI](https://zenodo.org/badge/1429926843.svg)](https://doi.org/10.5281/zenodo.23578393)
 
 **Wtyczka QGIS, która sprawdza granice gmin z PRG względem urzędowego rejestru TERC i pokazuje każdy problem na mapie.**
 
@@ -77,7 +78,7 @@ Granicy państwa (C7, w planie), samych powiatów i województw, zgodności gran
 
 ## Licencja
 
-GPL-2.0 lub nowsza. Dane do cytowania: [`CITATION.cff`](CITATION.cff). Zmiany: [`CHANGELOG.md`](CHANGELOG.md).
+GPL-2.0 lub nowsza. DOI (wszystkie wersje): [10.5281/zenodo.23578393](https://doi.org/10.5281/zenodo.23578393), wersja 0.1.0: [10.5281/zenodo.23578394](https://doi.org/10.5281/zenodo.23578394). Dane do cytowania: [`CITATION.cff`](CITATION.cff). Zmiany: [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 
