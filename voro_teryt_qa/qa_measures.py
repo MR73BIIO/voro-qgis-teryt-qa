@@ -9,6 +9,8 @@ The state border (C7) is not measured in v0.1.
 """
 from qgis.core import Qgis, QgsFeatureRequest, QgsGeometry, QgsSpatialIndex
 
+from .i18n import tr
+
 BUFFER_SEGMENTS = 16  # shapely default quad_segs, so the 1 m buffer around a gap is the same shape
 
 
@@ -49,7 +51,7 @@ def measure(source, teryt_field, name_field, terc, powiaty, powiaty_teryt_field,
     """Facts about the municipalities. Returns (m, geometries) where geometries[row] = QgsGeometry."""
     def step(text):
         if feedback is not None:
-            feedback.setProgressText(text)
+            feedback.setProgressText(tr(text))
 
     def canceled():
         return feedback is not None and feedback.isCanceled()

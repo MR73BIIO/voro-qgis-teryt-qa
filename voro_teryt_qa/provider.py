@@ -1,5 +1,8 @@
 """Processing provider: the group 'VORO TERYT QA' in the Processing Toolbox."""
+import os
+
 from qgis.core import QgsProcessingProvider
+from qgis.PyQt.QtGui import QIcon
 
 from .algorithm import BoundaryQaAlgorithm
 
@@ -16,3 +19,6 @@ class VoroTerytQaProvider(QgsProcessingProvider):
 
     def longName(self):  # noqa: N802 (QGIS name)
         return self.name()
+
+    def icon(self):
+        return QIcon(os.path.join(os.path.dirname(__file__), "icon.png"))

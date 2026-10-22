@@ -28,9 +28,10 @@ from qgis.core import (
     QgsProcessingParameterField,
     QgsProcessingParameterFile,
 )
-from qgis.PyQt.QtCore import QCoreApplication, QMetaType
+from qgis.PyQt.QtCore import QMetaType
+from qgis.PyQt.QtGui import QIcon
 
-from . import qa_checks, report
+from . import i18n, qa_checks, report
 from .qa_measures import measure
 
 HERE = os.path.dirname(__file__)
@@ -78,7 +79,7 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
     REPORT = "REPORT"
 
     def tr(self, text):
-        return QCoreApplication.translate("BoundaryQaAlgorithm", text)
+        return i18n.tr(text)
 
     def createInstance(self):  # noqa: N802 (QGIS name)
         return BoundaryQaAlgorithm()
@@ -86,20 +87,14 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
     def name(self):
         return "boundary_qa"
 
+    def icon(self):
+        return QIcon(os.path.join(HERE, "icon.png"))
+
     def displayName(self):  # noqa: N802 (QGIS name)
         return self.tr("Check boundaries against TERC")
 
     def shortHelpString(self):  # noqa: N802 (QGIS name)
-        return self.tr(
-            "Checks municipality polygons (PRG) against county polygons and the TERC register. "
-            "Output: one row per finding with the fields check, teryt, severity, detail.\n\n"
-            "Checks: C1 geometry, C2 TERYT codes, C3 municipality inside its own county, "
-            "C4 CRS and extent of Poland, C5 overlaps and gaps between municipalities, "
-            "C6 names against TERC.\n\n"
-            "Optional: an HTML report (UTF-8, in Polish) with the status, counts per check, "
-            "diagnostics, thresholds and the list of findings.\n\n"
-            "Thresholds and known exceptions come from voro-gis-qa and are not set here."
-        )
+        return i18n.help_text()
 
     def initAlgorithm(self, config=None):  # noqa: N802 (QGIS name)
         self.addParameter(QgsProcessingParameterFeatureSource(
@@ -146,8 +141,8 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
         except Exception as e:  # noqa: BLE001
             raise QgsProcessingException(f"TERC: {e}")
 
-        feedback.pushInfo(f"Municipalities: {gminy.featureCount()} | counties: {powiaty.featureCount()} "
-                          f"| CRS: {gminy.sourceCrs().authid()} | TERC municipalities: {len(terc)}")
+        feedback.pushInfo(self.tr("Municipalities: {} | counties: {} | CRS: {} | TERC municipalities: {}").format(
+            gminy.featureCount(), powiaty.featureCount(), gminy.sourceCrs().authid(), len(terc)))
 
         m, geometries = measure(gminy, teryt_field, name_field, terc,
                                 powiaty, powiaty_teryt_field, feedback)
@@ -177,11 +172,11 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
 
         per_check = Counter(fd["check"] for fd in findings)
         severities = {fd["severity"] for fd in findings}
-        feedback.pushInfo(f"Dataset status: {qa_checks.status_for(severities)}")
+        feedback.pushInfo(self.tr("Dataset status: {}").format(qa_checks.status_for(severities)))
         for c in CHECKS_IN_THIS_VERSION:
-            feedback.pushInfo(f"  {c}: {per_check.get(c, 0)} findings")
-        feedback.pushInfo(f"Diagnostics: {json.dumps(diagnostics, ensure_ascii=False)}")
-        feedback.pushInfo(f"Findings total: {len(findings)}")
+            feedback.pushInfo(self.tr("  {}: {} findings").format(c, per_check.get(c, 0)))
+        feedback.pushInfo(self.tr("Diagnostics: {}").format(json.dumps(diagnostics, ensure_ascii=False)))
+        feedback.pushInfo(self.tr("Findings total: {}").format(len(findings)))
 
         results = {self.OUTPUT: dest_id}
         report_path = self.parameterAsFileOutput(parameters, self.REPORT, context)
@@ -205,6 +200,6 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
                                  meta, names, params)
             with open(report_path, "w", encoding="utf-8") as fh:
                 fh.write(html)
-            feedback.pushInfo(f"HTML report: {report_path}")
+            feedback.pushInfo(self.tr("HTML report: {}").format(report_path))
             results[self.REPORT] = report_path
         return results
