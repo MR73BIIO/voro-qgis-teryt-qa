@@ -1,16 +1,23 @@
 """
 Check municipality boundaries against TERC.
 
-Stage 1: skeleton. Inputs and the findings layer are in place,
-the checks C1-C6 are not. The algorithm reads the inputs, reports counts
-and returns an empty findings layer.
+Stage 2: checks C1 (geometry), C2 (TERYT), C4 (CRS and extent), C6 (names vs TERC).
+C3 and C5 come in stage 3. Thresholds and known exceptions are the files
+params.json and known_exceptions.json copied from voro-gis-qa, not set in the dialog.
 """
+import json
 import os
+from collections import Counter
 
 from qgis.core import (
     Qgis,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeatureSink,
     QgsField,
     QgsFields,
+    QgsPointXY,
     QgsProcessing,
     QgsProcessingAlgorithm,
     QgsProcessingException,
@@ -21,7 +28,12 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QCoreApplication, QMetaType
 
+from . import qa_checks
+from .qa_measures import measure
+
+HERE = os.path.dirname(__file__)
 FINDING_FIELDS = ("check", "teryt", "severity", "detail")
+CHECKS_IN_THIS_VERSION = ("C1", "C2", "C4", "C6")
 
 
 def findings_fields():
@@ -29,6 +41,22 @@ def findings_fields():
     for name in FINDING_FIELDS:
         fields.append(QgsField(name, QMetaType.Type.QString))
     return fields
+
+
+def load_json(name):
+    with open(os.path.join(HERE, name), encoding="utf-8") as f:
+        return json.load(f)
+
+
+def poland_extent(expected_crs, transform_context):
+    """Corners of the Poland bbox (lon/lat) transformed to the expected CRS -> (minx, miny, maxx, maxy)."""
+    lon0, lat0, lon1, lat1 = qa_checks.PL_BBOX_LONLAT
+    tr = QgsCoordinateTransform(QgsCoordinateReferenceSystem("EPSG:4326"),
+                                QgsCoordinateReferenceSystem(expected_crs), transform_context)
+    pts = [tr.transform(QgsPointXY(x, y)) for x, y in
+           ((lon0, lat0), (lon1, lat0), (lon0, lat1), (lon1, lat1))]
+    xs, ys = [p.x() for p in pts], [p.y() for p in pts]
+    return min(xs), min(ys), max(xs), max(ys)
 
 
 class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
@@ -56,7 +84,9 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
         return self.tr(
             "Checks municipality polygons (PRG) against county polygons and the TERC register. "
             "Output: one row per finding with the fields check, teryt, severity, detail.\n\n"
-            "Early version: the checks are not in yet, the output layer is empty."
+            "Checks in this version: C1 geometry, C2 TERYT codes, C4 CRS and extent of Poland, "
+            "C6 names against TERC. Nesting in counties (C3) and overlaps/gaps (C5) come next.\n\n"
+            "Thresholds and known exceptions come from voro-gis-qa and are not set here."
         )
 
     def initAlgorithm(self, config=None):  # noqa: N802 (QGIS name)
@@ -87,9 +117,27 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
         powiaty = self.parameterAsSource(parameters, self.POWIATY, context)
         if powiaty is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.POWIATY))
+        teryt_field = self.parameterAsString(parameters, self.GMINY_TERYT, context)
+        name_field = self.parameterAsString(parameters, self.GMINY_NAME, context)
         terc_path = self.parameterAsFile(parameters, self.TERC, context)
         if not terc_path or not os.path.isfile(terc_path):
             raise QgsProcessingException(self.tr("TERC file not found: {}").format(terc_path))
+
+        params = load_json("params.json")
+        exceptions = load_json("known_exceptions.json")
+        try:
+            terc = qa_checks.load_terc_gminy(terc_path)
+        except Exception as e:  # noqa: BLE001
+            raise QgsProcessingException(f"TERC: {e}")
+
+        feedback.pushInfo(f"Municipalities: {gminy.featureCount()} | counties: {powiaty.featureCount()} "
+                          f"| CRS: {gminy.sourceCrs().authid()} | TERC municipalities: {len(terc)}")
+
+        m, geometries = measure(gminy, teryt_field, name_field, terc, feedback)
+        if feedback.isCanceled():
+            return {}
+        pl_extent = poland_extent(params["expected_crs"], context.transformContext())
+        findings, diagnostics = qa_checks.judge(m, params, exceptions, pl_extent)
 
         sink, dest_id = self.parameterAsSink(
             parameters, self.OUTPUT, context, findings_fields(),
@@ -97,10 +145,25 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
-        feedback.pushInfo(f"Municipalities: {gminy.featureCount()}")
-        feedback.pushInfo(f"Counties: {powiaty.featureCount()}")
-        feedback.pushInfo(f"CRS: {gminy.sourceCrs().authid()}")
-        feedback.pushInfo(f"TERC: {terc_path}")
-        feedback.pushInfo("Stage 1 skeleton: no checks yet, 0 findings.")
-        sink.flushBuffer()
+        geom_of = {}
+        for f, g in zip(m["features"], geometries):
+            geom_of.setdefault(f["teryt"], g)
+        for fd in findings:
+            feat = QgsFeature(findings_fields())
+            feat.setAttributes([fd["check"], fd["teryt"], fd["severity"], fd["detail"]])
+            g = geom_of.get(fd["teryt"]) if fd["teryt"] is not None else None
+            if g is not None and not g.isNull():
+                g = type(g)(g)
+                g.convertToMultiType()
+                feat.setGeometry(g)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
+
+        per_check = Counter(fd["check"] for fd in findings)
+        severities = {fd["severity"] for fd in findings}
+        feedback.pushInfo(f"Dataset status: {qa_checks.status_for(severities)}")
+        for c in CHECKS_IN_THIS_VERSION:
+            feedback.pushInfo(f"  {c}: {per_check.get(c, 0)} findings")
+        feedback.pushInfo("  C3, C5: not in this version")
+        feedback.pushInfo(f"Diagnostics: {json.dumps(diagnostics, ensure_ascii=False)}")
+        feedback.pushInfo(f"Findings total: {len(findings)}")
         return {self.OUTPUT: dest_id}
