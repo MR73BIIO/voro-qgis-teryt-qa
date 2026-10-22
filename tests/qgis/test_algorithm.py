@@ -157,3 +157,19 @@ def test_c6_shipped_exception_slupia(tmp_path):
     assert run(tmp_path, [["2602072", "Słupia (Jędrzejowska)", geom]], powiaty, terc) == []
     rows = run(tmp_path, [["2602072", "Slupia (Jędrzejowska)", geom]], powiaty, terc)
     assert checks_of(rows, "2602072") == {"C6"}
+
+
+def test_html_report_is_written_in_utf8(tmp_path):
+    gminy, powiaty = clean_data()
+    terc = terc_file(tmp_path, gminy)
+    gminy[2][1] = "Gdansk"
+    report_path = tmp_path / "raport.html"
+    res = processing.run(ALG, {
+        "GMINY": layer(gminy, "gminy"), "GMINY_TERYT": "teryt", "GMINY_NAME": "name",
+        "POWIATY": layer(powiaty, "powiaty"), "POWIATY_TERYT": "teryt",
+        "TERC": str(terc), "OUTPUT": str(tmp_path / "f.gpkg"), "REPORT": str(report_path)})
+    assert res["REPORT"] == str(report_path)
+    html = report_path.read_text(encoding="utf-8")
+    assert 'class="status REVIEW"' in html
+    assert "Gdansk" in html and "Gdańsk" in html  # name in the data and in TERC
+    assert "Łódź" not in html  # clean municipalities are not listed

@@ -5,9 +5,11 @@ Checks C1-C6 (v0.1 scope): C1 geometry, C2 TERYT, C3 nesting in counties,
 C4 CRS and extent, C5 overlaps and gaps, C6 names vs TERC. C7 (state border) comes in v0.2. Thresholds and known exceptions are the files
 params.json and known_exceptions.json copied from voro-gis-qa, not set in the dialog.
 """
+import configparser
 import json
 import os
 from collections import Counter
+from datetime import datetime
 
 from qgis.core import (
     Qgis,
@@ -21,13 +23,14 @@ from qgis.core import (
     QgsProcessingAlgorithm,
     QgsProcessingException,
     QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFileDestination,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingParameterFile,
 )
 from qgis.PyQt.QtCore import QCoreApplication, QMetaType
 
-from . import qa_checks
+from . import qa_checks, report
 from .qa_measures import measure
 
 HERE = os.path.dirname(__file__)
@@ -40,6 +43,12 @@ def findings_fields():
     for name in FINDING_FIELDS:
         fields.append(QgsField(name, QMetaType.Type.QString))
     return fields
+
+
+def plugin_version():
+    cfg = configparser.ConfigParser()
+    cfg.read(os.path.join(HERE, "metadata.txt"), encoding="utf-8")
+    return cfg.get("general", "version", fallback="?")
 
 
 def load_json(name):
@@ -66,6 +75,7 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
     POWIATY_TERYT = "POWIATY_TERYT"
     TERC = "TERC"
     OUTPUT = "OUTPUT"
+    REPORT = "REPORT"
 
     def tr(self, text):
         return QCoreApplication.translate("BoundaryQaAlgorithm", text)
@@ -86,6 +96,8 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
             "Checks: C1 geometry, C2 TERYT codes, C3 municipality inside its own county, "
             "C4 CRS and extent of Poland, C5 overlaps and gaps between municipalities, "
             "C6 names against TERC.\n\n"
+            "Optional: an HTML report (UTF-8, in Polish) with the status, counts per check, "
+            "diagnostics, thresholds and the list of findings.\n\n"
             "Thresholds and known exceptions come from voro-gis-qa and are not set here."
         )
 
@@ -109,6 +121,9 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
             self.TERC, self.tr("TERC register (CSV)"), extension="csv"))
         self.addParameter(QgsProcessingParameterFeatureSink(
             self.OUTPUT, self.tr("Findings")))
+        self.addParameter(QgsProcessingParameterFileDestination(
+            self.REPORT, self.tr("HTML report"), self.tr("HTML files (*.html)"),
+            optional=True, createByDefault=False))
 
     def processAlgorithm(self, parameters, context, feedback):  # noqa: N802 (QGIS name)
         gminy = self.parameterAsSource(parameters, self.GMINY, context)
@@ -167,4 +182,29 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
             feedback.pushInfo(f"  {c}: {per_check.get(c, 0)} findings")
         feedback.pushInfo(f"Diagnostics: {json.dumps(diagnostics, ensure_ascii=False)}")
         feedback.pushInfo(f"Findings total: {len(findings)}")
-        return {self.OUTPUT: dest_id}
+
+        results = {self.OUTPUT: dest_id}
+        report_path = self.parameterAsFileOutput(parameters, self.REPORT, context)
+        if report_path:
+            meta = {
+                "Data kontroli": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                "Warstwa gmin": gminy.sourceName(),
+                "Liczba gmin": m["n_features"],
+                "Warstwa powiatów": powiaty.sourceName(),
+                "Liczba powiatów": powiaty.featureCount(),
+                "Układ współrzędnych": m["crs"] or "brak",
+                "Plik TERC": os.path.basename(terc_path),
+                "Gminy w TERC": len(terc),
+                "Wtyczka": f"VORO TERYT QA {plugin_version()}",
+                "QGIS": Qgis.version(),
+            }
+            names = {}
+            for f in m["features"]:
+                names.setdefault(f["teryt"], f["name"])
+            html = report.render(findings, diagnostics, qa_checks.status_for(severities),
+                                 meta, names, params)
+            with open(report_path, "w", encoding="utf-8") as fh:
+                fh.write(html)
+            feedback.pushInfo(f"HTML report: {report_path}")
+            results[self.REPORT] = report_path
+        return results
