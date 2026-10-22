@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this plugin, please cite it as below."
+title: "voro-qgis-teryt-qa: QGIS plugin for quality checks of Polish municipality boundaries (PRG) against TERC"
+type: software
+authors:
+  - family-names: Ruszczak
+    given-names: Marcin
+    orcid: "https://orcid.org/0009-0004-0170-4277"
+    affiliation: Independent
+version: 0.1.0
+date-released: 2026-10-22
+license: GPL-2.0-or-later
+repository-code: "https://github.com/MR73BIIO/voro-qgis-teryt-qa"
+abstract: >-
+  QGIS Processing plugin that checks municipality polygons from the Polish
+  register of boundaries (PRG) against county polygons and the TERC register:
+  geometry, TERYT codes, nesting in counties, CRS and extent, overlaps and gaps,
+  names. Rules and thresholds come from voro-gis-qa; the plugin gives the same
+  findings on its test data.
+keywords:
+  - QGIS
+  - plugin
+  - GIS
+  - data quality
+  - PRG
+  - TERYT
+  - TERC
+  - Poland
+references:
+  - type: software
+    title: voro-gis-qa
+    doi: 10.5281/zenodo.23104107
