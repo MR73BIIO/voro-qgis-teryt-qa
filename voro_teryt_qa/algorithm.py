@@ -1,8 +1,8 @@
 """
 Check municipality boundaries against TERC.
 
-Stage 2: checks C1 (geometry), C2 (TERYT), C4 (CRS and extent), C6 (names vs TERC).
-C3 and C5 come in stage 3. Thresholds and known exceptions are the files
+Checks C1-C6 (v0.1 scope): C1 geometry, C2 TERYT, C3 nesting in counties,
+C4 CRS and extent, C5 overlaps and gaps, C6 names vs TERC. C7 (state border) comes in v0.2. Thresholds and known exceptions are the files
 params.json and known_exceptions.json copied from voro-gis-qa, not set in the dialog.
 """
 import json
@@ -33,7 +33,7 @@ from .qa_measures import measure
 
 HERE = os.path.dirname(__file__)
 FINDING_FIELDS = ("check", "teryt", "severity", "detail")
-CHECKS_IN_THIS_VERSION = ("C1", "C2", "C4", "C6")
+CHECKS_IN_THIS_VERSION = ("C1", "C2", "C3", "C4", "C5", "C6")
 
 
 def findings_fields():
@@ -84,8 +84,9 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
         return self.tr(
             "Checks municipality polygons (PRG) against county polygons and the TERC register. "
             "Output: one row per finding with the fields check, teryt, severity, detail.\n\n"
-            "Checks in this version: C1 geometry, C2 TERYT codes, C4 CRS and extent of Poland, "
-            "C6 names against TERC. Nesting in counties (C3) and overlaps/gaps (C5) come next.\n\n"
+            "Checks: C1 geometry, C2 TERYT codes, C3 municipality inside its own county, "
+            "C4 CRS and extent of Poland, C5 overlaps and gaps between municipalities, "
+            "C6 names against TERC.\n\n"
             "Thresholds and known exceptions come from voro-gis-qa and are not set here."
         )
 
@@ -118,6 +119,7 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
         if powiaty is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.POWIATY))
         teryt_field = self.parameterAsString(parameters, self.GMINY_TERYT, context)
+        powiaty_teryt_field = self.parameterAsString(parameters, self.POWIATY_TERYT, context)
         name_field = self.parameterAsString(parameters, self.GMINY_NAME, context)
         terc_path = self.parameterAsFile(parameters, self.TERC, context)
         if not terc_path or not os.path.isfile(terc_path):
@@ -133,8 +135,9 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
         feedback.pushInfo(f"Municipalities: {gminy.featureCount()} | counties: {powiaty.featureCount()} "
                           f"| CRS: {gminy.sourceCrs().authid()} | TERC municipalities: {len(terc)}")
 
-        m, geometries = measure(gminy, teryt_field, name_field, terc, feedback)
-        if feedback.isCanceled():
+        m, geometries = measure(gminy, teryt_field, name_field, terc,
+                                powiaty, powiaty_teryt_field, feedback)
+        if m is None or feedback.isCanceled():
             return {}
         pl_extent = poland_extent(params["expected_crs"], context.transformContext())
         findings, diagnostics = qa_checks.judge(m, params, exceptions, pl_extent)
@@ -163,7 +166,6 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
         feedback.pushInfo(f"Dataset status: {qa_checks.status_for(severities)}")
         for c in CHECKS_IN_THIS_VERSION:
             feedback.pushInfo(f"  {c}: {per_check.get(c, 0)} findings")
-        feedback.pushInfo("  C3, C5: not in this version")
         feedback.pushInfo(f"Diagnostics: {json.dumps(diagnostics, ensure_ascii=False)}")
         feedback.pushInfo(f"Findings total: {len(findings)}")
         return {self.OUTPUT: dest_id}

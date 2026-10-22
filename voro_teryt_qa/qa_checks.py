@@ -6,7 +6,7 @@ The measurement dict has the same schema as in voro-gis-qa (measures.measure),
 only the part needed by the checks that are already ported.
 
 Each finding: {"check", "teryt", "severity", "detail"}; teryt=None = whole dataset.
-Stage 2: C1, C2, C4, C6. C3 and C5 come in stage 3, C7 in v0.2.
+v0.1 scope: C1-C6. C7 (state border) comes in v0.2.
 """
 import csv
 from collections import Counter
@@ -46,6 +46,17 @@ def c2_teryt(m, params):
     return out
 
 
+def c3_nesting(m, params):
+    out = []
+    tol = params["c3_buffer_m"]
+    for f in m["features"]:
+        if not f["parent_exists"]:
+            out.append(finding("C3", f["teryt"], f"powiat {f['teryt'][:4]} nie istnieje"))
+        elif f["dist_to_parent_m"] is not None and f["dist_to_parent_m"] > tol:
+            out.append(finding("C3", f["teryt"], f"gmina lezy poza swoim powiatem {f['teryt'][:4]}"))
+    return out
+
+
 def crs_finding(m, params):
     expected = params["expected_crs"]
     if m["crs"] is None:
@@ -68,6 +79,33 @@ def c4_extent(m, params, pl_extent):
         x0, y0, x1, y1 = f["bounds"]
         if x0 < minx or x1 > maxx or y0 < miny or y1 > maxy:
             out.append(finding("C4", f["teryt"], "geometria poza zasiegiem Polski"))
+    return out
+
+
+def c5_topology(m, params, diagnostics):
+    """Same rules as voro-gis-qa; max() instead of numpy, the numbers are the same."""
+    out = []
+    tol_o, tol_g = params["c5_overlap_tol_m2"], params["c5_gap_tol_m2"]
+    for o in m["overlaps"]:
+        if o["area_m2"] > tol_o:
+            a = o["area_m2"]
+            out.append(finding("C5", o["a"], f"nakladanie z {o['b']}: {a:.1f} m2"))
+            out.append(finding("C5", o["b"], f"nakladanie z {o['a']}: {a:.1f} m2"))
+    below = [o["area_m2"] for o in m["overlaps"] if o["area_m2"] <= tol_o]
+    diagnostics["c5_overlap_pairs_checked"] = m["n_pairs_checked"]
+    diagnostics["c5_overlaps_below_tol"] = len(below)
+    diagnostics["c5_overlap_max_below_tol_m2"] = float(max(below)) if below else 0.0
+
+    for g in m["gaps"]:
+        if g["area_m2"] <= tol_g:
+            continue
+        touching = ", ".join(g["touching"]) if g["touching"] else "?"
+        for t in g["touching"]:
+            out.append(finding("C5", t, f"szczelina {g['area_m2']:.1f} m2 (graniczy z: {touching})"))
+    small = [g["area_m2"] for g in m["gaps"] if g["area_m2"] <= tol_g]
+    diagnostics["c5_gaps_total"] = len(m["gaps"])
+    diagnostics["c5_gaps_below_tol"] = len(small)
+    diagnostics["c5_gap_max_below_tol_m2"] = float(max(small)) if small else 0.0
     return out
 
 
@@ -101,7 +139,10 @@ def judge(m, params, exceptions=(), pl_extent=None):
         findings += c4_extent(m, params, pl_extent)
     findings += c1_geometry(m, params)
     findings += c2_teryt(m, params)
-    if crs is not None:
+    if crs is None:
+        findings += c3_nesting(m, params)
+        findings += c5_topology(m, params, diagnostics)
+    else:
         diagnostics["skipped"] = "C3, C5 pominiete z powodu zlego CRS"
     findings += c6_attributes(m, params, exceptions, diagnostics)
     return findings, diagnostics

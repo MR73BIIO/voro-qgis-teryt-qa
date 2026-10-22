@@ -4,27 +4,32 @@ QGIS plugin for quality checks of Polish administrative boundaries (PRG) against
 
 The checks come from [voro-gis-qa](https://github.com/MR73BIIO/voro-gis-qa), where they were built and measured in Python. This repository moves them into QGIS as a Processing algorithm: *VORO TERYT QA → Check boundaries against TERC*.
 
+## What it checks
+
+| Check | What it looks at | Severity |
+|---|---|---|
+| C1 | empty or invalid geometry | critical |
+| C2 | TERYT format, duplicates, municipality type 1/2/3 | critical |
+| C3 | municipality inside its own county | critical |
+| C4 | declared CRS, geometry inside the extent of Poland | critical |
+| C5 | overlaps and gaps between municipalities | high |
+| C6 | name present and equal to TERC | medium |
+
+Output: a layer with one row per finding (check, TERYT, severity, detail), with the geometry of the municipality, so the errors can be seen on the map. Thresholds and the known exception come from voro-gis-qa (`params.json`, `known_exceptions.json`).
+
+Not yet: C7 (state border), report, translations.
+
 ## Status
 
-Version 0.0.2, tested in QGIS 3.44.15 on Windows.
+Version 0.0.3, tested in QGIS 3.44.15 on Windows. Results against the prediction written before the code (`PREDICTION.md`):
 
-Checks in the plugin now:
+- **P1, golden dataset** (2479 municipalities, 380 counties): 0 findings, status PASS, the known C6 exception applied once. 7075 pairs of municipalities checked for overlaps, the same number as in voro-gis-qa.
+- **P2, `seed_42`** (160 injected errors, 20 of each type E1–E8): 160 of 160 found with the expected check, 0 false alarms. Scored with `evaluate.py` from voro-gis-qa.
+- **P3, same answers:** 2335 pairs (check, TERYT) on `seed_42`, identical to voro-gis-qa. Compared with `scripts/compare_parity.py`. One difference in the diagnostics, without effect on findings, is described in `docs/differences.md`.
 
-| Check | What it looks at |
-|---|---|
-| C1 | empty or invalid geometry |
-| C2 | TERYT format, duplicates, municipality type 1/2/3 |
-| C4 | declared CRS, geometry inside the extent of Poland |
-| C6 | name present and equal to TERC |
+Run time on the full layer: about 60 seconds.
 
-Next: C3 (municipality inside its own county) and C5 (overlaps and gaps).
-
-Measured so far, against the prediction in `PREDICTION.md`:
-
-- Golden dataset, 2479 municipalities: 0 findings, status PASS, the one known C6 exception applied once.
-- `seed_42` from voro-gis-qa (160 injected errors): the plugin and voro-gis-qa give the same 139 pairs (check, TERYT) for C1, C2, C4 and C6. C1 20, C2 20, C4 20, C6 79. Compared with `scripts/compare_parity.py`.
-
-One thing learned on the way: Processing stops on invalid geometries by default. A QA tool has to read them, so the plugin switches that filter off for its own read of the municipalities layer.
+Two things learned on the way: Processing stops on invalid geometries by default, so the plugin switches that filter off for its own read (a QA tool has to see them). And the algorithm must not be run with "iterate over this layer", because overlaps, gaps and duplicates only exist between municipalities.
 
 ## License
 
