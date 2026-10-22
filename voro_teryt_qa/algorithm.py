@@ -18,7 +18,6 @@ from qgis.core import (
     QgsField,
     QgsFields,
     QgsPointXY,
-    QgsProcessing,
     QgsProcessingAlgorithm,
     QgsProcessingException,
     QgsProcessingParameterFeatureSink,
@@ -93,7 +92,7 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):  # noqa: N802 (QGIS name)
         self.addParameter(QgsProcessingParameterFeatureSource(
             self.GMINY, self.tr("Municipalities (gminy)"),
-            [QgsProcessing.SourceType.TypeVectorPolygon]))
+            [Qgis.ProcessingSourceType.VectorPolygon]))
         self.addParameter(QgsProcessingParameterField(
             self.GMINY_TERYT, self.tr("Municipality TERYT field"),
             defaultValue="teryt", parentLayerParameterName=self.GMINY))
@@ -102,7 +101,7 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
             defaultValue="name", parentLayerParameterName=self.GMINY))
         self.addParameter(QgsProcessingParameterFeatureSource(
             self.POWIATY, self.tr("Counties (powiaty)"),
-            [QgsProcessing.SourceType.TypeVectorPolygon]))
+            [Qgis.ProcessingSourceType.VectorPolygon]))
         self.addParameter(QgsProcessingParameterField(
             self.POWIATY_TERYT, self.tr("County TERYT field"),
             defaultValue="teryt", parentLayerParameterName=self.POWIATY))
