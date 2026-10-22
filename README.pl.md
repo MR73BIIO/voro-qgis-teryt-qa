@@ -37,6 +37,10 @@ Warstwę znalezisk, jeden wiersz na problem, z geometrią gminy (mapa powyżej).
 
 ![Raport HTML](docs/img/report.png)
 
+## Wypróbuj w dwie minuty
+
+Folder [`sample_data/`](sample_data/) zawiera mały wycinek prawdziwych danych PRG, pasujące wiersze TERC i kopię z jednym wstrzykniętym błędem każdego typu. Pobierz repozytorium, przeciągnij `sample_broken.gpkg` do QGIS i uruchom algorytm z `terc_sample.csv`. Oczekiwany wynik, policzony przez voro-gis-qa, jest zapisany w [`sample_data/README.md`](sample_data/README.md). Testy automatyczne uruchamiają wtyczkę na tych samych plikach.
+
 ## Instalacja
 
 Pobierz `voro_teryt_qa-0.1.0.zip` ze strony [Releases](https://github.com/MR73BIIO/voro-qgis-teryt-qa/releases). W QGIS: *Wtyczki → Zarządzanie wtyczkami → Instaluj z pliku ZIP*.
@@ -65,7 +69,7 @@ Przewidywanie dla wersji 0.1 zapisałem w [`PREDICTION.md`](PREDICTION.md) przed
 | P2: wszystkie wstrzyknięte błędy wykryte, bez fałszywych alarmów | `seed_42`, 160 błędów (po 20 każdego typu): wykryte 160 ze 160, 0 fałszywych alarmów |
 | P3: te same odpowiedzi co voro-gis-qa | 2335 z 2335 par (kontrola, TERYT) identycznych. Jedna różnica w diagnostyce, bez wpływu: [`docs/differences.md`](docs/differences.md) |
 
-Automatyczne sprawdzanie przy każdym pushu: kontrola kodu (ruff), 23 testy logiki, raportu i tłumaczeń oraz 13 testów całej wtyczki w QGIS 3.40, 3.44 i 4.2 na Linuksie. Ręcznie: QGIS 3.44.15 na Windowsie.
+Automatyczne sprawdzanie przy każdym pushu: kontrola kodu (ruff), 23 testy logiki, raportu i tłumaczeń oraz 16 testów całej wtyczki w QGIS 3.40, 3.44 i 4.2 na Linuksie, w tym trzy na prawdziwych danych z `sample_data/`, porównywane ze znaleziskami voro-gis-qa. Ręcznie: QGIS 3.44.15 na Windowsie.
 
 ## Czego nie sprawdza
 

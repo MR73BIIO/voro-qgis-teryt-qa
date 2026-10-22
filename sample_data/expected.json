@@ -1,0 +1,381 @@
+{
+ "made_with": "voro-gis-qa scripts (measures.measure + checks.judge), C7 not included",
+ "made_on": "2026-10-22",
+ "counties": [
+  "1601",
+  "1602",
+  "1603",
+  "1604",
+  "1605"
+ ],
+ "municipalities": 25,
+ "terc_file": "data/raw/TERC_Urzedowy_2026-09-29.csv",
+ "seed": 7,
+ "clean": {
+  "findings": [],
+  "diagnostics": {
+   "c5_overlap_pairs_checked": 37,
+   "c5_overlaps_below_tol": 0,
+   "c5_overlap_max_below_tol_m2": 0.0,
+   "c5_gaps_total": 0,
+   "c5_gaps_below_tol": 0,
+   "c5_gap_max_below_tol_m2": 0.0,
+   "c7": "pominiete: brak warstwy granicy panstwa",
+   "c6_known_exceptions_applied": 0
+  }
+ },
+ "broken": {
+  "findings": [
+   {
+    "check": "C4",
+    "teryt": "1603062"
+   },
+   {
+    "check": "C1",
+    "teryt": "1604023"
+   },
+   {
+    "check": "C2",
+    "teryt": "1601022"
+   },
+   {
+    "check": "C3",
+    "teryt": "1699043"
+   },
+   {
+    "check": "C3",
+    "teryt": "1603062"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605023"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1602033"
+   },
+   {
+    "check": "C5",
+    "teryt": "1602013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605023"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605023"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605023"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605023"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605023"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605023"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605023"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605023"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605023"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605053"
+   },
+   {
+    "check": "C5",
+    "teryt": "1605013"
+   },
+   {
+    "check": "C6",
+    "teryt": "1601033"
+   },
+   {
+    "check": "C6",
+    "teryt": "1699043"
+   },
+   {
+    "check": "C6",
+    "teryt": "1601022"
+   },
+   {
+    "check": "C6",
+    "teryt": "1605033"
+   }
+  ],
+  "per_check": {
+   "C4": 1,
+   "C1": 1,
+   "C2": 1,
+   "C3": 2,
+   "C5": 63,
+   "C6": 4
+  },
+  "diagnostics": {
+   "c5_overlap_pairs_checked": 28,
+   "c5_overlaps_below_tol": 0,
+   "c5_overlap_max_below_tol_m2": 0.0,
+   "c5_gaps_total": 29,
+   "c5_gaps_below_tol": 0,
+   "c5_gap_max_below_tol_m2": 0.0,
+   "c7": "pominiete: brak warstwy granicy panstwa",
+   "c6_known_exceptions_applied": 0
+  },
+  "injected": [
+   {
+    "error": "E1",
+    "teryt": "1604023",
+    "detail": "zamiana wierzcholkow 2192/2193"
+   },
+   {
+    "error": "E2",
+    "teryt": "1601022",
+    "detail": "skopiowany TERYT gminy 1601022"
+   },
+   {
+    "error": "E3",
+    "teryt": "1699043",
+    "detail": "powiat 1601 -> 1699"
+   },
+   {
+    "error": "E4",
+    "teryt": "1603062",
+    "detail": "geometria w EPSG:4326 w warstwie EPSG:2180"
+   },
+   {
+    "error": "E5",
+    "teryt": "1605013",
+    "detail": "przesuniecie 47.0 m"
+   },
+   {
+    "error": "E6",
+    "teryt": "1602033",
+    "detail": "szczelina r=23.5 m przy granicy z 1602013"
+   },
+   {
+    "error": "E7",
+    "teryt": "1601033",
+    "detail": "'Grodków' -> 'Grodkow'"
+   },
+   {
+    "error": "E8",
+    "teryt": "1605033",
+    "detail": "usunieto nazwe 'Strzeleczki'"
+   }
+  ],
+  "detected": 8,
+  "false_alarms": 0
+ }
+}

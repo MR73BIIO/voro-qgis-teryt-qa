@@ -37,6 +37,10 @@ A layer of findings, one row per problem, with the geometry of the municipality 
 
 ![HTML report](docs/img/report.png)
 
+## Try it in two minutes
+
+The folder [`sample_data/`](sample_data/) has a small cut of real PRG data, the matching TERC rows, and a copy with one injected error of each type. Download the repository, drag `sample_broken.gpkg` into QGIS and run the algorithm with `terc_sample.csv`. The expected result, computed by voro-gis-qa, is written in [`sample_data/README.md`](sample_data/README.md). The automatic tests run the plugin on the same files.
+
 ## Install
 
 Download `voro_teryt_qa-0.1.0.zip` from [Releases](https://github.com/MR73BIIO/voro-qgis-teryt-qa/releases). In QGIS: *Plugins → Manage and Install Plugins → Install from ZIP*.
@@ -65,7 +69,7 @@ The prediction for version 0.1 was written in [`PREDICTION.md`](PREDICTION.md) b
 | P2: all injected errors found, no false alarms | `seed_42`, 160 errors (20 of each type): 160 of 160 found, 0 false alarms |
 | P3: the same answers as voro-gis-qa | 2335 of 2335 pairs (check, TERYT) identical. One difference in diagnostics, without effect: [`docs/differences.md`](docs/differences.md) |
 
-Automatic checks run on every push: code check (ruff), 23 tests of the logic, the report and the translations, and 13 tests of the whole plugin inside QGIS 3.40, 3.44 and 4.2 on Linux. Manual runs: QGIS 3.44.15 on Windows.
+Automatic checks run on every push: code check (ruff), 23 tests of the logic, the report and the translations, and 16 tests of the whole plugin inside QGIS 3.40, 3.44 and 4.2 on Linux, three of them on the real data in `sample_data/` against the findings of voro-gis-qa. Manual runs: QGIS 3.44.15 on Windows.
 
 ## What it does not check
 
