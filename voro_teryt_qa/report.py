@@ -22,7 +22,8 @@ SEVERITY_LABEL = {"krytyczna": "krytyczna", "wysoka": "wysoka", "srednia": "śre
 DOI = "10.5281/zenodo.23104107"
 
 CSS = """
-body{font-family:Segoe UI,Arial,sans-serif;color:#1f2933;max-width:1000px;margin:24px auto;padding:0 16px;line-height:1.45}
+body{font-family:Segoe UI,Arial,sans-serif;color:#1f2933;max-width:1000px;margin:24px auto;
+     padding:0 16px;line-height:1.45}
 h1{font-size:22px;margin:0 0 4px}h2{font-size:17px;margin:28px 0 8px;border-bottom:1px solid #d9dee3;padding-bottom:4px}
 h3{font-size:15px;margin:18px 0 6px}
 .sub{color:#5f6b76;margin:0 0 18px}
@@ -117,7 +118,7 @@ def render(findings, diagnostics, status, meta, names=None, params=None):
     by_check = defaultdict(list)
     for f in findings:
         by_check[f["check"]].append(f)
-    for cid, desc, sev in CHECKS:
+    for cid, desc, _sev in CHECKS:
         rows = by_check.get(cid)
         if not rows:
             continue

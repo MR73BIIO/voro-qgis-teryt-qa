@@ -1,0 +1,48 @@
+name: Bug report / Zgłoszenie błędu
+description: Something does not work as described. / Coś nie działa tak, jak opisano.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. Please do not attach data you are not allowed to share.
+        Dziękuję. Proszę nie załączać danych, których nie wolno udostępniać.
+  - type: input
+    id: qgis
+    attributes:
+      label: QGIS version / Wersja QGIS
+      description: Help → About / Pomoc → O programie
+      placeholder: 3.44.15
+    validations:
+      required: true
+  - type: input
+    id: plugin
+    attributes:
+      label: Plugin version / Wersja wtyczki
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system / System
+      placeholder: Windows 11 / Ubuntu 24.04 / macOS 15
+  - type: textarea
+    id: data
+    attributes:
+      label: Data / Dane
+      description: Source of the layers (for example PRG from geoportal.gov.pl, date), CRS, number of municipalities, TERC file date. / Źródło warstw (np. PRG z geoportal.gov.pl, data), układ, liczba gmin, data pliku TERC.
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened and what you expected / Co się stało i czego oczekiwano
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log of the algorithm / Log algorytmu
+      description: Copy from the Log tab of the algorithm window. / Skopiuj z zakładki Plik zdarzeń.
+      render: text

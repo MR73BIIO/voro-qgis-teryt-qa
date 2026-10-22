@@ -1,12 +1,16 @@
 [English](README.md) | **Polski**
 
-# voro-qgis-teryt-qa
+# VORO TERYT QA
 
-Wtyczka QGIS do kontroli jakości granic gmin z PRG względem urzędowego rejestru TERC.
+[![tests](https://github.com/MR73BIIO/voro-qgis-teryt-qa/actions/workflows/tests.yml/badge.svg)](https://github.com/MR73BIIO/voro-qgis-teryt-qa/actions/workflows/tests.yml)
+![QGIS](https://img.shields.io/badge/QGIS-3.40%20%7C%203.44%20%7C%204.2-589632)
+![Licencja](https://img.shields.io/badge/licencja-GPL--2.0%20lub%20nowsza-blue)
 
-Dodaje jeden algorytm Processing: **VORO TERYT QA → Sprawdź granice gmin z TERC**. Podajesz warstwę gmin, warstwę powiatów i plik TERC. Wynik to warstwa znalezisk, jeden wiersz na problem, z geometrią gminy, więc błędy widać na mapie. Opcjonalnie powstaje raport HTML.
+**Wtyczka QGIS, która sprawdza granice gmin z PRG względem urzędowego rejestru TERC i pokazuje każdy problem na mapie.**
 
-Kontrole zbudowałem i zmierzyłem najpierw w Pythonie, w [voro-gis-qa](https://github.com/MR73BIIO/voro-gis-qa). Wtyczka przenosi je do QGIS bez zmiany reguł i progów.
+![Znaleziska na zbiorze testowym seed_42](docs/img/map_findings.png)
+
+Dane granic często odbiera się po obejrzeniu mapy. Ta wtyczka daje kontrolę, którą można powtórzyć: te same reguły, te same progi, ten sam wynik na każdym komputerze. Powstała z [voro-gis-qa](https://github.com/MR73BIIO/voro-gis-qa), gdzie reguły zmierzyłem najpierw w Pythonie, i daje te same znaleziska.
 
 ## Co sprawdza
 
@@ -21,39 +25,55 @@ Kontrole zbudowałem i zmierzyłem najpierw w Pythonie, w [voro-gis-qa](https://
 
 Status całego zbioru: **PASS** (brak znalezisk), **REVIEW** (są znaleziska, żadne krytyczne), **REJECT** (co najmniej jedno krytyczne).
 
-W tej wersji nie są sprawdzane: granica państwa (C7), same powiaty i województwa, zgodność granic z terenem albo z dokumentami prawnymi.
+Jak działa każda kontrola, z rysunkami: [`docs/checks.pl.md`](docs/checks.pl.md).
+
+## Co dostajesz
+
+Algorytm Processing, po polsku albo po angielsku, zależnie od języka QGIS. Na czystej warstwie PRG zwraca PASS:
+
+![Algorytm w QGIS: złoty zbiór, status PASS](docs/img/dialog_pass.png)
+
+Warstwę znalezisk, jeden wiersz na problem, z geometrią gminy (mapa powyżej). A jeśli chcesz, raport HTML po polsku, który można wydrukować albo wysłać:
+
+![Raport HTML](docs/img/report.png)
 
 ## Instalacja
 
-Dopóki wtyczki nie ma w oficjalnym repozytorium QGIS: pobierz ZIP ze strony Releases, a potem w QGIS *Wtyczki → Zarządzanie wtyczkami → Instaluj z pliku ZIP*.
+Pobierz `voro_teryt_qa-0.1.0.zip` ze strony [Releases](https://github.com/MR73BIIO/voro-qgis-teryt-qa/releases). W QGIS: *Wtyczki → Zarządzanie wtyczkami → Instaluj z pliku ZIP*.
+
+![Wtyczka w menedżerze wtyczek QGIS](docs/img/plugin_manager.png)
 
 Wymagania: QGIS 3.40 lub nowszy, także QGIS 4. Bez dodatkowych pakietów Pythona.
 
 ## Użycie
 
 1. Wczytaj warstwy gmin i powiatów (np. z PRG) w EPSG:2180.
-2. Otwórz Panel algorytmów i uruchom *VORO TERYT QA → Sprawdź granice gmin z TERC*.
+2. Uruchom z Panelu algorytmów *VORO TERYT QA → Sprawdź granice gmin z TERC*.
 3. Wybierz warstwy, pola TERYT i nazwy oraz plik TERC (CSV z GUS).
 4. Opcjonalnie wskaż plik raportu HTML.
 5. Nie włączaj „iteracji po tej warstwie”. Nakładania, szczeliny i duplikaty istnieją tylko między gminami.
 
 Na pełnej warstwie PRG (2479 gmin) przebieg trwa około minuty.
 
-Interfejs jest po polsku, gdy QGIS działa po polsku, a w innych językach po angielsku. Raport HTML jest po polsku.
-
 ## Jak było testowane
 
-Przewidywanie dla wersji 0.1 zapisałem w `PREDICTION.md` przed napisaniem kodu wtyczki. Wyniki:
+Przewidywanie dla wersji 0.1 zapisałem w [`PREDICTION.md`](PREDICTION.md) przed napisaniem kodu wtyczki. Wszystkie trzy części się sprawdziły:
 
-- **Złoty zbiór** (2479 gmin, 380 powiatów): 0 znalezisk, status PASS. 7075 par gmin sprawdzonych pod kątem nakładania, tyle samo co w voro-gis-qa.
-- **`seed_42`** z voro-gis-qa (160 wstrzykniętych błędów, po 20 każdego typu): wykryte 160 ze 160 właściwą kontrolą, 0 fałszywych alarmów.
-- **Te same odpowiedzi co voro-gis-qa:** 2335 par (kontrola, TERYT) na `seed_42`, identycznych. Jedna różnica w diagnostyce, bez wpływu na znaleziska, jest opisana w `docs/differences.md`.
+| Przewidywanie | Wynik |
+|---|---|
+| P1: złoty zbiór (2479 gmin) nie daje znalezisk | 0 znalezisk, PASS. Sprawdzone 7075 par gmin, tyle samo co w voro-gis-qa |
+| P2: wszystkie wstrzyknięte błędy wykryte, bez fałszywych alarmów | `seed_42`, 160 błędów (po 20 każdego typu): wykryte 160 ze 160, 0 fałszywych alarmów |
+| P3: te same odpowiedzi co voro-gis-qa | 2335 z 2335 par (kontrola, TERYT) identycznych. Jedna różnica w diagnostyce, bez wpływu: [`docs/differences.md`](docs/differences.md) |
 
-Testy automatyczne przy każdym pushu (GitHub Actions): 23 testy logiki, raportu i tłumaczeń bez QGIS oraz 13 testów całej wtyczki w QGIS 3.40, 3.44 i 4.2 na Linuksie. Ręcznie: QGIS 3.44.15 na Windowsie.
+Automatyczne sprawdzanie przy każdym pushu: kontrola kodu (ruff), 23 testy logiki, raportu i tłumaczeń oraz 13 testów całej wtyczki w QGIS 3.40, 3.44 i 4.2 na Linuksie. Ręcznie: QGIS 3.44.15 na Windowsie.
+
+## Czego nie sprawdza
+
+Granicy państwa (C7, w planie), samych powiatów i województw, zgodności granic z terenem albo z dokumentami prawnymi. Kontrola porównuje dane między sobą i z rejestrem TERC.
 
 ## Licencja
 
-GPL-2.0 lub nowsza.
+GPL-2.0 lub nowsza. Dane do cytowania: [`CITATION.cff`](CITATION.cff). Zmiany: [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 

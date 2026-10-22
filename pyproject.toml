@@ -1,0 +1,18 @@
+# Settings for the code checker (ruff). The plugin itself has no Python dependencies.
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I", "UP", "N"]
+ignore = [
+    "N802",   # QGIS API method names are camelCase (initAlgorithm, processAlgorithm)
+    "UP006", "UP035",  # keep plain typing, QGIS 3.40 ships various Python versions
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["E402"]   # tests add paths before importing
+
+[tool.ruff.lint.isort]
+known-first-party = ["voro_teryt_qa"]
+known-third-party = ["qgis", "processing"]

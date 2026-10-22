@@ -1,0 +1,15 @@
+name: Idea / Propozycja
+description: A new check or a change to an existing one. / Nowa kontrola albo zmiana istniejącej.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What should be checked, and why / Co należy sprawdzać i dlaczego
+      description: A real case helps most, for example a type of error found in data from a tender. / Najbardziej pomaga prawdziwy przypadek, np. rodzaj błędu znaleziony w danych z przetargu.
+    validations:
+      required: true
+  - type: textarea
+    id: rule
+    attributes:
+      label: Proposed rule and threshold / Proponowana reguła i próg

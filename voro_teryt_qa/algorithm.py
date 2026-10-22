@@ -1,9 +1,10 @@
 """
 Check municipality boundaries against TERC.
 
-Checks C1-C6 (v0.1 scope): C1 geometry, C2 TERYT, C3 nesting in counties,
-C4 CRS and extent, C5 overlaps and gaps, C6 names vs TERC. C7 (state border) comes in v0.2. Thresholds and known exceptions are the files
-params.json and known_exceptions.json copied from voro-gis-qa, not set in the dialog.
+Checks C1-C6: C1 geometry, C2 TERYT, C3 nesting in counties, C4 CRS and extent,
+C5 overlaps and gaps, C6 names vs TERC. C7 (state border) comes in a later version.
+Thresholds and known exceptions are the files params.json and known_exceptions.json
+copied from voro-gis-qa, not set in the dialog.
 """
 import configparser
 import json
@@ -23,10 +24,10 @@ from qgis.core import (
     QgsProcessingAlgorithm,
     QgsProcessingException,
     QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterFileDestination,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingParameterFile,
+    QgsProcessingParameterFileDestination,
 )
 from qgis.PyQt.QtCore import QMetaType
 from qgis.PyQt.QtGui import QIcon
@@ -139,7 +140,7 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
         try:
             terc = qa_checks.load_terc_gminy(terc_path)
         except Exception as e:  # noqa: BLE001
-            raise QgsProcessingException(f"TERC: {e}")
+            raise QgsProcessingException(f"TERC: {e}") from e
 
         feedback.pushInfo(self.tr("Municipalities: {} | counties: {} | CRS: {} | TERC municipalities: {}").format(
             gminy.featureCount(), powiaty.featureCount(), gminy.sourceCrs().authid(), len(terc)))

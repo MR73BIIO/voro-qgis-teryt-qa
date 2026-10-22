@@ -3,13 +3,13 @@ The whole algorithm inside QGIS, on a small synthetic dataset:
 2 counties x 4 municipalities, squares of 1 km in EPSG:2180 (as in voro-gis-qa tests).
 Each test breaks one thing and checks that the expected check reports it.
 """
+import processing
 from qgis.core import (
     QgsFeature,
     QgsGeometry,
     QgsRectangle,
     QgsVectorLayer,
 )
-import processing
 
 X0, Y0 = 500000.0, 500000.0
 COUNTIES = ["0401", "0402"]
