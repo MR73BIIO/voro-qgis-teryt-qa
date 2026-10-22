@@ -28,3 +28,20 @@ from voro_teryt_qa.provider import VoroTerytQaProvider  # noqa: E402
 
 _provider = VoroTerytQaProvider()
 QgsApplication.processingRegistry().addProvider(_provider)
+
+
+# QGIS 4 (Qt6) can crash with a segmentation fault while Python tears QGIS down at exit,
+# after all tests have already run and been reported. The test result is known by then,
+# so the process ends right away with pytest's own exit code, without that teardown.
+_exit = {"code": 0}
+
+
+def pytest_sessionfinish(session, exitstatus):
+    _exit["code"] = int(exitstatus)
+
+
+def pytest_unconfigure(config):
+    QgsApplication.processingRegistry().removeProvider(_provider)
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(_exit["code"])
