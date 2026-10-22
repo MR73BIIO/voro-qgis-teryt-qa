@@ -1,0 +1,18 @@
+[general]
+name=VORO TERYT QA
+qgisMinimumVersion=3.40
+qgisMaximumVersion=4.99
+supportsQt6=True
+description=Quality checks of Polish municipality boundaries (PRG) against the TERC register.
+about=Processing algorithm that checks municipality polygons from PRG: geometry, TERYT codes, nesting in counties, extent of Poland, overlaps and gaps, names against TERC. Rules and thresholds come from voro-gis-qa. This is an early version: the skeleton runs, the checks are not in yet.
+version=0.0.1
+author=Marcin Ruszczak (MR73BIIO)
+email=76017062+MR73BIIO@users.noreply.github.com
+homepage=https://github.com/MR73BIIO/voro-qgis-teryt-qa
+tracker=https://github.com/MR73BIIO/voro-qgis-teryt-qa/issues
+repository=https://github.com/MR73BIIO/voro-qgis-teryt-qa
+hasProcessingProvider=yes
+category=Analysis
+tags=poland,teryt,terc,prg,boundaries,quality,validation,processing
+experimental=True
+deprecated=False
