@@ -20,3 +20,12 @@ The prediction (P3 in `PREDICTION.md`) allows a difference only when its cause i
 ## 2. Text of `detail` for invalid geometry (C1)
 
 The reason for an invalid geometry is written by QGIS, not by Shapely, so the wording can differ. The prediction compares only pairs (check, TERYT), not this text.
+
+## 3. C7, state border (v0.2): no difference
+
+Checked on 2026-10-24 with the plugin from branch v0.2 (QGIS 3.44.15, GEOS 3.15) against voro-gis-qa 544fbec.
+The pairs (check, TERYT) of C7 are identical on the golden dataset (0 = 0), `seed_42` (1752 = 1752) and `seed_9` (20 = 20).
+The diagnostics of C7 are the same: number of pieces, pieces below the threshold, sea exception used once.
+The largest piece below the threshold differs only in the ninth digit (golden: 73.59102821 m² in the plugin,
+73.59102822 m² in voro-gis-qa). The piece of 149.69 m² on `seed_42`, 0.31 m² under the threshold, has the same
+area in both tools and stays below the threshold. Point 1 above is still the only difference.

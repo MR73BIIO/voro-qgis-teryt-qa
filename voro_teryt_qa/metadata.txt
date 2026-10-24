@@ -3,8 +3,8 @@ name=VORO TERYT QA
 qgisMinimumVersion=3.40
 qgisMaximumVersion=4.99
 description=Quality checks of Polish municipality boundaries (PRG) against the TERC register.
-about=Processing algorithm that checks municipality polygons from PRG: geometry, TERYT codes, nesting in counties, extent of Poland, overlaps and gaps, names against TERC. Rules and thresholds come from voro-gis-qa. Checks C1-C6, optional HTML report, interface in Polish and English. No external dependencies: only what QGIS already has. The state border check (C7) comes in a later version.
-version=0.1.1
+about=Processing algorithm that checks municipality polygons from PRG: geometry, TERYT codes, nesting in counties, extent of Poland, overlaps and gaps, names against TERC, and the state border when the state border layer is given. Rules and thresholds come from voro-gis-qa. Checks C1-C7, optional HTML report, interface in Polish and English. No external dependencies: only what QGIS already has.
+version=0.2.0
 author=Marcin Ruszczak (MR73BIIO)
 email=ruszczak11@gmail.com
 homepage=https://github.com/MR73BIIO/voro-qgis-teryt-qa
@@ -17,5 +17,6 @@ icon=icon.png
 experimental=False
 deprecated=False
 changelog=
+    0.2.0 Check C7: state border. Pieces of Poland without a municipality and parts of municipalities outside Poland larger than 150 m2 are findings; the sea is a known area. Two new optional inputs: the state border layer and the layer of known areas without municipalities. Same findings as voro-gis-qa: 1752 of 1752 C7 pairs on seed_42, 20 of 20 gaps at the state border found with 0 false alarms, golden dataset PASS. Without the state layer the result is the same as in 0.1.1.
     0.1.1 Security scan fix: report status texts are built from pairs, so Bandit no longer reads the PASS status as a password. Same texts, same report. Removed the deprecated supportsQt6 flag (QGIS 4 support comes from qgisMaximumVersion). No change to checks, rules or thresholds.
     0.1.0 First release. Checks C1-C6 with the rules and thresholds of voro-gis-qa. Same findings as voro-gis-qa on its test data (2335 of 2335 pairs on seed_42, 160 of 160 injected errors found, 0 false alarms). Optional HTML report in Polish. Interface in Polish and English. Tested in QGIS 3.40, 3.44 and 4.2.

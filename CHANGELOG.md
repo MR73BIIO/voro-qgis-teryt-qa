@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 · 2026-10-24
+
+- New check C7, state border (high): pieces of Poland without a municipality and parts of municipalities outside Poland larger than 150 m2 (`c7_border_tol_m2`). Rule, threshold and the sea exception from voro-gis-qa, unchanged.
+- Two new optional inputs: *State border* (PRG `A00_Granice_panstwa`) and *Known areas without municipalities* (the sea, one reference piece). Without the state layer C7 is skipped and the result is the same as in 0.1.1.
+- HTML report: row, diagnostics and threshold of C7, names of the new input layers.
+- Measured against the prediction written before the code (`PREDICTION_v0.2.md`): golden dataset 0 findings with the sea exception used once; `seed_9` 20 of 20 gaps at the state border found, 0 false alarms; 1752 of 1752 C7 pairs identical with voro-gis-qa on `seed_42`. Details: `docs/results_v0.2.md`.
+- Known limitation: the area of the sea was measured on one PRG edition; with another edition C7 gives one finding for the whole dataset.
+
 ## 0.1.1 · 2026-10-24
 
 - Report status texts are built from pairs, so the plugins.qgis.org security scan (Bandit B105) no longer reads the `PASS` status as a password. Same texts, same report.

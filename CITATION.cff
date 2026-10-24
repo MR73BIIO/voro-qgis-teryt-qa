@@ -7,7 +7,7 @@ authors:
     given-names: Marcin
     orcid: "https://orcid.org/0009-0004-0170-4277"
     affiliation: Independent
-version: 0.1.1
+version: 0.2.0
 doi: 10.5281/zenodo.23578393
 date-released: '2026-10-24'
 license: GPL-2.0-or-later
@@ -16,7 +16,7 @@ abstract: >-
   QGIS Processing plugin that checks municipality polygons from the Polish
   register of boundaries (PRG) against county polygons and the TERC register:
   geometry, TERYT codes, nesting in counties, CRS and extent, overlaps and gaps,
-  names. Rules and thresholds come from voro-gis-qa; the plugin gives the same
+  names, and the state border. Rules and thresholds come from voro-gis-qa; the plugin gives the same
   findings on its test data.
 keywords:
   - QGIS
