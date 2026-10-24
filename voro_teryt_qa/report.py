@@ -12,6 +12,7 @@ CHECKS = [
     ("C4", "Deklarowany układ współrzędnych i zasięg Polski", "krytyczna"),
     ("C5", "Nakładania i szczeliny między gminami", "wysoka"),
     ("C6", "Nazwa obecna i zgodna z TERC", "srednia"),
+    ("C7", "Pokrycie granicy państwa", "wysoka"),
 ]
 # Built from pairs, not a dict literal: Bandit B105 reads a "PASS" key as a password
 # (false positive in the plugins.qgis.org security scan). Same texts as before.
@@ -97,6 +98,11 @@ def render(findings, diagnostics, status, meta, names=None, params=None):
         "c5_gaps_below_tol": "C5: szczeliny poniżej progu (nie są błędem)",
         "c5_gap_max_below_tol_m2": "C5: największa szczelina poniżej progu [m²]",
         "c6_known_exceptions_applied": "C6: użyte znane wyjątki nazw",
+        "c7": "C7",
+        "c7_pieces_total": "C7: kawałki przy granicy państwa (bez gminy albo poza państwem)",
+        "c7_pieces_below_tol": "C7: kawałki poniżej progu (nie są błędem)",
+        "c7_max_below_tol_m2": "C7: największy kawałek poniżej progu [m²]",
+        "c7_known_exceptions_applied": "C7: użyte znane wyjątki (morze)",
         "skipped": "Pominięte kontrole",
     }
     for k, v in diagnostics.items():
@@ -109,7 +115,8 @@ def render(findings, diagnostics, status, meta, names=None, params=None):
                    "c3_buffer_m": "C3: tolerancja odległości od powiatu [m]",
                    "c4_margin_m": "C4: margines wokół zasięgu Polski [m]",
                    "c5_overlap_tol_m2": "C5: próg nakładania [m²]",
-                   "c5_gap_tol_m2": "C5: próg szczeliny [m²]"}
+                   "c5_gap_tol_m2": "C5: próg szczeliny [m²]",
+                   "c7_border_tol_m2": "C7: próg kawałka przy granicy państwa [m²]"}
         for k, lab in plabels.items():
             if k in params:
                 out.append(f"<tr><td>{escape(lab)}</td><td class=\"n\">{escape(_fmt_num(params[k]))}</td></tr>")
@@ -136,7 +143,7 @@ def render(findings, diagnostics, status, meta, names=None, params=None):
 
     out.append("<h2>Czego ta kontrola nie sprawdza</h2><ul>")
     for line in [
-        "Granicy państwa (kawałki Polski bez gminy, gminy poza granicą). Ta kontrola (C7) będzie w kolejnej wersji.",
+        "Granicy państwa (C7), jeśli nie podano warstwy granicy państwa.",
         "Zgodności przebiegu granic z rzeczywistością w terenie ani z dokumentami prawnymi. "
         "Kontrola porównuje dane między sobą i z rejestrem TERC.",
         "Samych powiatów i województw. Powiaty służą tylko jako odniesienie dla C3.",

@@ -51,3 +51,13 @@ def test_polish_characters_survive_utf8(tmp_path):
 def test_status_text_covers_all_statuses():
     # 0.1.1: STATUS_TEXT is built from pairs (Bandit B105); the keys must stay the same
     assert set(report.STATUS_TEXT) == {"PASS", "REVIEW", "REJECT"}
+
+
+def test_c7_row_and_border_diagnostics():
+    findings = [{"check": "C7", "teryt": "0201011", "severity": "wysoka",
+                 "detail": "kawalek Polski bez gminy: 6751.3 m2"}]
+    diag = {"c7_pieces_total": 7438, "c7_known_exceptions_applied": 1}
+    html = report.render(findings, diag, "REVIEW", META, params={"c7_border_tol_m2": 150.0})
+    assert "C7 · Pokrycie granicy państwa (1)" in html
+    assert "C7: użyte znane wyjątki (morze)" in html
+    assert "C7: próg kawałka przy granicy państwa [m²]" in html

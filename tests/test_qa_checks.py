@@ -132,3 +132,65 @@ def test_load_terc(tmp_path, sep):
     path = tmp_path / "terc.csv"
     path.write_text("\n".join(sep.join(r) for r in rows), encoding="utf-8-sig")
     assert q.load_terc_gminy(path) == {"0201011": "Bolesławiec", "0201022": "Bolesławiec"}
+
+
+# ---------------------------------------------------------------- C7 (v0.2)
+SEA = next(e for e in EXCEPTIONS if e["check"] == "C7")
+
+
+def piece(kind, area, touching=(), reference=False):
+    p = {"kind": kind, "area_m2": area, "bounds": [0.0, 0.0, 1.0, 1.0], "at_state_border": True,
+         "touching": list(touching)}
+    if reference:
+        p["reference"] = True
+    return p
+
+
+def test_c7_skipped_without_state_layer():
+    findings, diag = q.judge(dataset(feat("0201011")), PARAMS, EXCEPTIONS, PL_EXTENT)
+    assert findings == [] and "c7" in diag
+
+
+def test_c7_sea_reference_matches_exception():
+    m = dataset(feat("0201011"), border=[piece("uncovered", SEA["area_m2"] + 0.5, reference=True),
+                                         piece("uncovered", 73.6, ["0201011"])])
+    findings, diag = q.judge(m, PARAMS, EXCEPTIONS, PL_EXTENT)
+    assert findings == []
+    assert diag["c7_known_exceptions_applied"] == 1
+    assert diag["c7_pieces_total"] == 2 and diag["c7_pieces_below_tol"] == 1
+
+
+def test_c7_sea_with_other_area_is_one_finding_for_the_dataset():
+    m = dataset(feat("0201011"), border=[piece("uncovered", SEA["area_m2"] + 5000.0, reference=True)])
+    assert pairs(m) == {("C7", None)}
+
+
+def test_c7_sea_without_reference_layer_matched_by_area():
+    m = dataset(feat("0201011"), border=[piece("uncovered", SEA["area_m2"], ["0201011"])])
+    findings, diag = q.judge(m, PARAMS, EXCEPTIONS, PL_EXTENT)
+    assert findings == [] and diag["c7_known_exceptions_applied"] == 1
+
+
+def test_c7_piece_above_threshold_reported_for_every_touching_municipality():
+    tol = PARAMS["c7_border_tol_m2"]
+    m = dataset(feat("0201011"), feat("0201022"),
+                border=[piece("uncovered", tol + 1, ["0201011", "0201022"]),
+                        piece("outside", tol, ["0201011"])])
+    findings, diag = q.judge(m, PARAMS, EXCEPTIONS, PL_EXTENT)
+    assert sorted(f["teryt"] for f in findings) == ["0201011", "0201022"]
+    assert all(f["check"] == "C7" and f["severity"] == "wysoka" for f in findings)
+    assert diag["c7_pieces_below_tol"] == 1 and diag["c7_max_below_tol_m2"] == tol
+
+
+def test_c7_outside_piece_without_neighbour_is_for_the_dataset():
+    m = dataset(feat("0201011"), border=[piece("outside", 1000.0)])
+    findings, _ = q.judge(m, PARAMS, EXCEPTIONS, PL_EXTENT)
+    assert [(f["check"], f["teryt"]) for f in findings] == [("C7", None)]
+    assert "poza granica panstwa" in findings[0]["detail"]
+
+
+def test_c7_skipped_with_wrong_crs():
+    m = dataset(feat("0201011"), crs="EPSG:4326", border=[piece("uncovered", 1000.0, ["0201011"])])
+    findings, diag = q.judge(m, PARAMS, EXCEPTIONS, PL_EXTENT)
+    assert {(f["check"], f["teryt"]) for f in findings} == {("C4", None)}
+    assert "C7" in diag["skipped"]

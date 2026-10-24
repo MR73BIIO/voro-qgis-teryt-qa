@@ -6,7 +6,7 @@ The measurement dict has the same schema as in voro-gis-qa (measures.measure),
 only the part needed by the checks that are already ported.
 
 Each finding: {"check", "teryt", "severity", "detail"}; teryt=None = whole dataset.
-v0.1 scope: C1-C6. C7 (state border) comes in v0.2.
+Scope: C1-C7. C7 (state border) since v0.2.
 """
 import csv
 from collections import Counter
@@ -129,6 +129,49 @@ def c6_attributes(m, params, exceptions=(), diagnostics=None):
     return out
 
 
+def c7_border(m, params, exceptions=(), diagnostics=None):
+    """State border: pieces above the threshold. An exception (e.g. the sea) only for the same kind
+    and an area equal within tolerance_m2. Copied from voro-gis-qa scripts/checks.py (544fbec)."""
+    out = []
+    if m.get("border") is None:
+        if diagnostics is not None:
+            diagnostics["c7"] = "pominiete: brak warstwy granicy panstwa"
+        return out
+    tol = params["c7_border_tol_m2"]
+    allowed = [e for e in exceptions if e["check"] == "C7"]
+    applied, below = 0, []
+    for p in m["border"]:
+        if p.get("reference"):
+            # known area (the sea): must match the exception; if not, the whole area changed
+            if any(e["kind"] == p["kind"] and abs(e["area_m2"] - p["area_m2"]) <= e["tolerance_m2"]
+                   for e in allowed):
+                applied += 1
+            else:
+                out.append(finding("C7", None,
+                                   f"znany obszar bez gmin ma inna powierzchnie: {p['area_m2']:.1f} m2"))
+            continue
+        if p["area_m2"] <= tol:
+            below.append(p["area_m2"])
+            continue
+        if any(e["kind"] == p["kind"] and abs(e["area_m2"] - p["area_m2"]) <= e["tolerance_m2"]
+               for e in allowed):
+            applied += 1
+            continue
+        what = "kawalek Polski bez gminy" if p["kind"] == "uncovered" else "gmina poza granica panstwa"
+        detail = f"{what}: {p['area_m2']:.1f} m2"
+        if p["touching"]:
+            for t in p["touching"]:
+                out.append(finding("C7", t, detail))
+        else:
+            out.append(finding("C7", None, detail))
+    if diagnostics is not None:
+        diagnostics["c7_pieces_total"] = len(m["border"])
+        diagnostics["c7_pieces_below_tol"] = len(below)
+        diagnostics["c7_max_below_tol_m2"] = float(max(below)) if below else 0.0
+        diagnostics["c7_known_exceptions_applied"] = applied
+    return out
+
+
 def judge(m, params, exceptions=(), pl_extent=None):
     """Judgement of measurements -> (findings, diagnostics). Order as in voro-gis-qa."""
     diagnostics, findings = {}, []
@@ -142,8 +185,9 @@ def judge(m, params, exceptions=(), pl_extent=None):
     if crs is None:
         findings += c3_nesting(m, params)
         findings += c5_topology(m, params, diagnostics)
+        findings += c7_border(m, params, exceptions, diagnostics)
     else:
-        diagnostics["skipped"] = "C3, C5 pominiete z powodu zlego CRS"
+        diagnostics["skipped"] = "C3, C5, C7 pominiete z powodu zlego CRS"
     findings += c6_attributes(m, params, exceptions, diagnostics)
     return findings, diagnostics
 

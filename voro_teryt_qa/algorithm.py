@@ -1,8 +1,8 @@
 """
 Check municipality boundaries against TERC.
 
-Checks C1-C6: C1 geometry, C2 TERYT, C3 nesting in counties, C4 CRS and extent,
-C5 overlaps and gaps, C6 names vs TERC. C7 (state border) comes in a later version.
+Checks C1-C7: C1 geometry, C2 TERYT, C3 nesting in counties, C4 CRS and extent,
+C5 overlaps and gaps, C6 names vs TERC, C7 state border (only when the state layer is given).
 Thresholds and known exceptions are the files params.json and known_exceptions.json
 copied from voro-gis-qa, not set in the dialog.
 """
@@ -33,11 +33,11 @@ from qgis.PyQt.QtCore import QMetaType
 from qgis.PyQt.QtGui import QIcon
 
 from . import i18n, qa_checks, report
-from .qa_measures import measure
+from .qa_measures import measure, read_geometries
 
 HERE = os.path.dirname(__file__)
 FINDING_FIELDS = ("check", "teryt", "severity", "detail")
-CHECKS_IN_THIS_VERSION = ("C1", "C2", "C3", "C4", "C5", "C6")
+CHECKS_IN_THIS_VERSION = ("C1", "C2", "C3", "C4", "C5", "C6", "C7")
 
 
 def findings_fields():
@@ -76,6 +76,8 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
     POWIATY = "POWIATY"
     POWIATY_TERYT = "POWIATY_TERYT"
     TERC = "TERC"
+    STATE = "STATE"
+    KNOWN_UNCOVERED = "KNOWN_UNCOVERED"
     OUTPUT = "OUTPUT"
     REPORT = "REPORT"
 
@@ -115,6 +117,12 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
             defaultValue="teryt", parentLayerParameterName=self.POWIATY))
         self.addParameter(QgsProcessingParameterFile(
             self.TERC, self.tr("TERC register (CSV)"), extension="csv"))
+        self.addParameter(QgsProcessingParameterFeatureSource(
+            self.STATE, self.tr("State border (optional, for C7)"),
+            [Qgis.ProcessingSourceType.VectorPolygon], optional=True))
+        self.addParameter(QgsProcessingParameterFeatureSource(
+            self.KNOWN_UNCOVERED, self.tr("Known areas without municipalities, e.g. the sea (optional, for C7)"),
+            [Qgis.ProcessingSourceType.VectorPolygon], optional=True))
         self.addParameter(QgsProcessingParameterFeatureSink(
             self.OUTPUT, self.tr("Findings")))
         self.addParameter(QgsProcessingParameterFileDestination(
@@ -145,8 +153,28 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr("Municipalities: {} | counties: {} | CRS: {} | TERC municipalities: {}").format(
             gminy.featureCount(), powiaty.featureCount(), gminy.sourceCrs().authid(), len(terc)))
 
+        state = self.parameterAsSource(parameters, self.STATE, context)
+        reference = self.parameterAsSource(parameters, self.KNOWN_UNCOVERED, context)
+        state_geoms = ref_geoms = None
+        if state is not None:
+            if not state.sourceCrs().isValid():
+                raise QgsProcessingException(self.tr("State border layer has no CRS"))
+            if reference is not None and not reference.sourceCrs().isValid():
+                raise QgsProcessingException(self.tr("Layer of known areas without municipalities has no CRS"))
+            if gminy.sourceCrs().authid() == params["expected_crs"]:
+                target = QgsCoordinateReferenceSystem(params["expected_crs"])
+                state_geoms = read_geometries(state, target, context.transformContext())
+                if reference is not None:
+                    ref_geoms = read_geometries(reference, target, context.transformContext())
+            else:
+                feedback.pushInfo(self.tr("C7: state layer not used, the municipalities are not in {}").format(
+                    params["expected_crs"]))
+        elif reference is not None:
+            feedback.pushInfo(self.tr("C7: known areas layer given without the state layer, C7 is skipped"))
+
         m, geometries = measure(gminy, teryt_field, name_field, terc,
-                                powiaty, powiaty_teryt_field, feedback)
+                                powiaty, powiaty_teryt_field, feedback,
+                                state=state_geoms, reference=ref_geoms)
         if m is None or feedback.isCanceled():
             return {}
         pl_extent = poland_extent(params["expected_crs"], context.transformContext())
@@ -191,6 +219,8 @@ class BoundaryQaAlgorithm(QgsProcessingAlgorithm):
                 "Układ współrzędnych": m["crs"] or "brak",
                 "Plik TERC": os.path.basename(terc_path),
                 "Gminy w TERC": len(terc),
+                "Warstwa granicy państwa": state.sourceName() if state is not None else "brak (C7 pominięta)",
+                "Znane obszary bez gmin": reference.sourceName() if reference is not None else "brak",
                 "Wtyczka": f"VORO TERYT QA {plugin_version()}",
                 "QGIS": Qgis.version(),
             }
