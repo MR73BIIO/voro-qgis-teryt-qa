@@ -7,9 +7,9 @@ authors:
     given-names: Marcin
     orcid: "https://orcid.org/0009-0004-0170-4277"
     affiliation: Independent
-version: 0.1.0
+version: 0.1.1
 doi: 10.5281/zenodo.23578393
-date-released: 2026-10-22
+date-released: '2026-10-24'
 license: GPL-2.0-or-later
 repository-code: "https://github.com/MR73BIIO/voro-qgis-teryt-qa"
 abstract: >-

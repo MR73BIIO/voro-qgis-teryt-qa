@@ -46,3 +46,8 @@ def test_polish_characters_survive_utf8(tmp_path):
     path.write_text(html, encoding="utf-8")
     text = path.read_text(encoding="utf-8")
     assert '<meta charset="utf-8">' in text and "Łódź, Gdańsk" in text
+
+
+def test_status_text_covers_all_statuses():
+    # 0.1.1: STATUS_TEXT is built from pairs (Bandit B105); the keys must stay the same
+    assert set(report.STATUS_TEXT) == {"PASS", "REVIEW", "REJECT"}

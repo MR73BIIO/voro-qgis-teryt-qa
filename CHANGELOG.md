@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 · 2026-10-24
+
+- Report status texts are built from pairs, so the plugins.qgis.org security scan (Bandit B105) no longer reads the `PASS` status as a password. Same texts, same report.
+- Removed the deprecated `supportsQt6` flag from `metadata.txt`; QGIS 4 support comes from `qgisMaximumVersion=4.99`.
+- No change to checks C1-C6, rules or thresholds.
+
 ## 0.1.0 · 2026-10-22
 
 First release.

@@ -44,7 +44,7 @@ Folder [`sample_data/`](sample_data/) zawiera mały wycinek prawdziwych danych P
 
 ## Instalacja
 
-Pobierz `voro_teryt_qa-0.1.0.zip` ze strony [Releases](https://github.com/MR73BIIO/voro-qgis-teryt-qa/releases). W QGIS: *Wtyczki → Zarządzanie wtyczkami → Instaluj z pliku ZIP*.
+Pobierz `voro_teryt_qa-0.1.1.zip` ze strony [Releases](https://github.com/MR73BIIO/voro-qgis-teryt-qa/releases). W QGIS: *Wtyczki → Zarządzanie wtyczkami → Instaluj z pliku ZIP*.
 
 ![Wtyczka w menedżerze wtyczek QGIS](docs/img/plugin_manager.png)
 

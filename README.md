@@ -44,7 +44,7 @@ The folder [`sample_data/`](sample_data/) has a small cut of real PRG data, the 
 
 ## Install
 
-Download `voro_teryt_qa-0.1.0.zip` from [Releases](https://github.com/MR73BIIO/voro-qgis-teryt-qa/releases). In QGIS: *Plugins → Manage and Install Plugins → Install from ZIP*.
+Download `voro_teryt_qa-0.1.1.zip` from [Releases](https://github.com/MR73BIIO/voro-qgis-teryt-qa/releases). In QGIS: *Plugins → Manage and Install Plugins → Install from ZIP*.
 
 ![The plugin in the QGIS plugin manager](docs/img/plugin_manager.png)
 
